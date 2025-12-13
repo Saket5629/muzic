@@ -1,8 +1,20 @@
+import 'dart:developer';
+
 import 'package:client/core/app_routing_manager/app_routing_manager.dart';
 import 'package:client/core/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await Firebase.initializeApp();
+    log('✅ Firebase initialized successfully!');
+  } catch (e) {
+    log('❌ Firebase initialization error: $e');
+  }
+  
   runApp(const MyApp());
 }
 

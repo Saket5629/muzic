@@ -1,4 +1,6 @@
+import 'package:client/constants/assets_constants.dart';
 import 'package:client/core/screen_names.dart';
+import 'package:client/core/services/auth_services.dart';
 import 'package:client/features/auth/view/widgets/custom_text_field.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,7 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,24 +57,49 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(onPressed: () {}, child: const Text("Sign up with Google")),
+                  child: ElevatedButton(onPressed: () async {
+                    final authService = AuthService();
+                    try {
+                      final userCredential = await authService.signInWithGoogle();
+                      if (!mounted) return;
+                      if (userCredential != null) {
+                        //
+                        context.pushNamed(ScreenNames.signUpProcessScreen);
+                      }
+                    }
+                    catch (e) {
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Sign in failed: $e')),
+                      );
+                    }
+                  }, child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(AssetsConstants.googleIconPng, width: 24, height: 24),
+                      const SizedBox(width: 10,),
+                      const Text("Sign up with Google"),
+                    ],
+                  )),
                 ),
                 const SizedBox(height: 40),
                 Center(
-                  child: Column(
-                    children: [
-                      const Text("Already have an account? ", style: TextStyle(color: Colors.white, fontSize: 16)),
-                      const SizedBox(height: 8),
-                      GestureDetector(
-                        onTap: () {
-                          context.pushReplacementNamed(ScreenNames.loginScreen);
-                        },
-                        child: const Text(
-                          "Log in",
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
+                  child: GestureDetector(
+                    onTap: () {
+                      context.pushReplacementNamed(ScreenNames.loginScreen);
+                    },
+                    child: RichText(
+                      text: TextSpan(
+                        text: "Already have an account? ",
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                        children: [
+                          TextSpan(
+                            text: "Log in",
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ],

@@ -1,21 +1,17 @@
 import 'package:client/features/auth/view/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 
-class SignupProcessScreen extends StatefulWidget{
+class SignupProcessScreen extends StatefulWidget {
   const SignupProcessScreen({super.key});
 
   @override
   State<SignupProcessScreen> createState() => _SignupProcessScreenState();
 }
 
-class _SignupProcessScreenState extends State<SignupProcessScreen>{
-  final passwordRequirements = [
-    "1 letter",
-    "1 number or special character(example: !@#\$%)",
-    "6 characters"
-  ];
+class _SignupProcessScreenState extends State<SignupProcessScreen> {
+  final passwordRequirements = ["(i). 1 letter", "(ii). 1 number or special character(example: !@#\$%)", "(iii). 6 characters"];
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: Column(
@@ -27,22 +23,20 @@ class _SignupProcessScreenState extends State<SignupProcessScreen>{
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 40),
-          Padding(padding: EdgeInsets.only(bottom: 8.0), child: Text("Password"),),
+          Padding(padding: EdgeInsets.only(bottom: 8.0), child: Text("Password")),
           const CustomTextField(),
-          const SizedBox(height: 20,),
-          Text("Your password must contain at least",
-            style: TextStyle(color: Colors.white, fontSize: 16),
+          const SizedBox(height: 30),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text("Your password must contain at least", style: TextStyle(color: Colors.white, fontSize: 16)),
           ),
-          ListView.builder(
-            itemCount: passwordRequirements.length,
-            itemBuilder: (context, index) {
-              return Text(
-                passwordRequirements[index],
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              );
-            },
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: passwordRequirements.map((requirement) {
+              return Text(requirement, style: TextStyle(color: Colors.white, fontSize: 16));
+            }).toList(),
           ),
-          const SizedBox(height: 30,),
+          const SizedBox(height: 30),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -53,7 +47,7 @@ class _SignupProcessScreenState extends State<SignupProcessScreen>{
             ),
           ),
         ],
-      )
+      ),
     );
   }
 }
