@@ -1,7 +1,7 @@
-import 'package:client/constants/assets_constants.dart';
-import 'package:client/core/screen_names.dart';
-import 'package:client/core/services/auth_services.dart';
-import 'package:client/features/auth/view/widgets/custom_text_field.dart';
+import 'package:muzic/constants/assets_constants.dart';
+import 'package:muzic/core/screen_names.dart';
+import 'package:muzic/core/services/auth_services.dart';
+import 'package:muzic/features/auth/view/widgets/custom_text_field.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
@@ -57,30 +57,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(onPressed: () async {
-                    final authService = AuthService();
-                    try {
-                      final userCredential = await authService.signInWithGoogle();
-                      if (!mounted) return;
-                      if (userCredential != null) {
-                        //
-                        context.pushNamed(ScreenNames.signUpProcessScreen);
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      final authService = AuthService();
+                      try {
+                        final userCredential = await authService.signInWithGoogle();
+                        if (!mounted) return;
+                        if (userCredential != null) {
+                          //
+                          context.pushNamed(ScreenNames.signUpProcessScreen);
+                        }
+                      } catch (e) {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Sign in failed: $e')));
                       }
-                    }
-                    catch (e) {
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Sign in failed: $e')),
-                      );
-                    }
-                  }, child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(AssetsConstants.googleIconPng, width: 24, height: 24),
-                      const SizedBox(width: 10,),
-                      const Text("Sign up with Google"),
-                    ],
-                  )),
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [Image.asset(AssetsConstants.googleIconPng, width: 24, height: 24), const SizedBox(width: 10), const Text("Sign up with Google")],
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 40),
                 Center(
