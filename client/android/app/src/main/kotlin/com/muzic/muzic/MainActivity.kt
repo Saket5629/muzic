@@ -11,7 +11,7 @@ class MainActivity : FlutterActivity() {
 
     // Map icon index to activity-alias name (matching your AndroidManifest.xml)
     private val iconAliases = mapOf(
-        1 to "com.muzic.muzic.LauncherDefault",
+        1 to "com.muzic.muzic.MainActivity",
         2 to "com.muzic.muzic.LauncherDiwali",
         3 to "com.muzic.muzic.LauncherHoli"
     )
