@@ -1,7 +1,7 @@
 import 'package:muzic/constants/assets_constants.dart';
 import 'package:muzic/core/screen_names.dart';
 import 'package:muzic/core/services/auth_services.dart';
-import 'package:muzic/features/auth/view/widgets/custom_text_field.dart';
+import 'package:muzic/features/helper_widgets/custom_text_field.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +39,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(onPressed: () {}, child: const Text("Continue")),
+                  child: ElevatedButton(onPressed: () {
+                    context.pushNamed(ScreenNames.mainScreen);
+                  }, child: const Text("Continue")),
                 ),
                 const SizedBox(height: 20),
                 Center(

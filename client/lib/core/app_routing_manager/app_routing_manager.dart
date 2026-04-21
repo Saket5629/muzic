@@ -4,6 +4,8 @@ import 'package:muzic/features/auth/view/pages/login_screen.dart';
 import 'package:muzic/features/auth/view/pages/signup_process_screen.dart';
 import 'package:muzic/features/auth/view/pages/signup_screen.dart';
 import 'package:go_router/go_router.dart';
+import 'package:muzic/view/home/view/home_screen.dart';
+import 'package:muzic/view/main_screen/main_screen.dart';
 import 'package:muzic/view/splash/splash_screen.dart';
 
 final GlobalKey<NavigatorState> rootNavKey = GlobalKey<NavigatorState>();
@@ -34,6 +36,16 @@ class AppRoutingManager {
         path: "/${ScreenNames.signUpProcessScreen}",
         name: ScreenNames.signUpProcessScreen,
         builder: (context, state) => const SignupProcessScreen(),
+      ),
+      GoRoute(
+        path: "/${ScreenNames.homeScreen}",
+        name: ScreenNames.homeScreen,
+        builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: "/${ScreenNames.mainScreen}",
+        name: ScreenNames.mainScreen,
+        builder: (context, state) => const MainScreen(),
       ),
     ],
   );

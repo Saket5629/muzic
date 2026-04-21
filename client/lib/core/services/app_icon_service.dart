@@ -23,11 +23,25 @@ class AppIconService {
   static const String _pendingIconKey = 'pending_app_icon';
   static const String _currentIconKey = 'current_app_icon';
 
+  /// Guard flag: survives hot restart (same Dart isolate) but resets on
+  /// a true cold start (new process). This prevents the activity-alias
+  /// swap from firing on hot restart, which would kill the running activity.
+  static bool _hasAppliedThisSession = false;
+
   /// Call this at app startup (before splash screen navigation).
   /// It checks if there's a pending icon change from the previous session
   /// and applies it now (at cold start, before user interaction).
   static Future<void> applyPendingIconChange() async {
     if (!Platform.isAndroid) return;
+
+    // Skip if we've already applied during this process lifetime.
+    // Hot restart reuses the process, so this flag stays true and
+    // prevents the icon swap from re-killing the activity.
+    if (_hasAppliedThisSession) {
+      log('⏭️ Icon change already applied this session, skipping');
+      return;
+    }
+    _hasAppliedThisSession = true;
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -38,15 +52,27 @@ class AppIconService {
 
         if (currentIcon != pendingIcon) {
           log('🔄 Applying pending icon change: $currentIcon → $pendingIcon');
+
+          // IMPORTANT: Persist state BEFORE the native icon swap!
+          // The activity-alias change will kill the app, so any writes
+          // after _changeAppIconNow() may never reach disk.
+          await prefs.setInt(_currentIconKey, pendingIcon);
+          await prefs.remove(_pendingIconKey);
+
+          // Force a synchronous commit to disk (not async apply)
+          // so the data is definitely saved before the process dies.
+          await prefs.reload();
+
           final success = await _changeAppIconNow(pendingIcon);
           if (success) {
-            await prefs.setInt(_currentIconKey, pendingIcon);
             log('✅ Icon changed to $pendingIcon');
           }
+        } else {
+          // Icon already matches, just clean up the stale pending key
+          await prefs.remove(_pendingIconKey);
+          await prefs.setInt(_currentIconKey, pendingIcon);
+          log('✅ Icon already matches pending ($pendingIcon), cleared stale pending key');
         }
-
-        // Clear the pending change (whether successful or not)
-        await prefs.remove(_pendingIconKey);
       }
     } catch (e) {
       log('⚠️ Error applying pending icon change: $e');
@@ -56,7 +82,7 @@ class AppIconService {
   /// Schedule an icon change for the next cold start.
   /// This does NOT apply the change immediately (to prevent app being killed).
   ///
-  /// [iconIndex]: 1 = Default, 2 = Sale, 3 = Diwali, 4 = Holi
+  /// [iconIndex]: 1 = Default, 2 = Diwali, 3 = Holi
   ///
   /// Returns `true` if the change was scheduled.
   static Future<bool> scheduleIconChange(int iconIndex) async {
@@ -64,11 +90,20 @@ class AppIconService {
     if (iconIndex < 1 || iconIndex > 3) return false;
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final currentIcon = prefs.getInt(_currentIconKey) ?? 1;
+      // Use the NATIVE source of truth, not SharedPreferences
+      // (which may be stale if the app was killed during an icon swap).
+      final currentIcon = await getCurrentIcon();
 
       if (currentIcon == iconIndex) {
         log('✅ Icon is already set to $iconIndex, no change needed');
+        return false;
+      }
+
+      // Also check if this exact change is already pending
+      final prefs = await SharedPreferences.getInstance();
+      final pendingIcon = prefs.getInt(_pendingIconKey);
+      if (pendingIcon == iconIndex) {
+        log('✅ Icon change to $iconIndex is already scheduled');
         return false;
       }
 
